@@ -18,6 +18,9 @@
         <Menu text="Tools">
             <MenuItem text="Migrate Legacy Content..." onAction="#handleMigrateDefaultContent" />
             <MenuItem text="Refresh Lists" onAction="#handleRefresh" />
+            <MenuItem text="Backup Selected World" onAction="#handleBackupWorld" />
+            <MenuItem text="Restore World from Backup..." onAction="#handleRestoreWorld" />
+            <SeparatorMenuItem />
         </Menu>
     </MenuBar>
 
@@ -122,6 +125,14 @@
         <ComboBox fx:id="versionComboBox" HBox.hgrow="ALWAYS" maxWidth="Infinity" />
         <Button text="Choose .minecraft..." onAction="#handleChooseFolder" minWidth="-Infinity" />
         <Button text="Launch Minecraft" onAction="#handleLaunch" minWidth="-Infinity" />
+
     </HBox>
+
+        <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 6 10; -fx-background-color: #000007;">
+        <Label fx:id="statusLabel" text="Ready" HBox.hgrow="ALWAYS"/>
+        <Region HBox.hgrow="ALWAYS" />
+        <ProgressBar fx:id="operationProgressBar" progress="0.0" visible="false" prefWidth="150"/>
+        <ProgressIndicator fx:id="operationSpinner" visible="false" prefWidth="20" prefHeight="20"/>
+        </HBox>
 
 </VBox>

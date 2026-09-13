@@ -35,7 +35,9 @@ public class MainController {
     @FXML private ListView<String> availableDatapacksView, enabledDatapacksView;
     @FXML private ListView<String> availableStructuresView, enabledStructuresView;
     @FXML private ListView<String> worldSelectorListView;
-
+    @FXML private Label statusLabel;
+    @FXML private ProgressBar operationProgressBar;
+    @FXML private ProgressIndicator operationSpinner;
     private Path mcDir;
 
     @FXML
@@ -53,10 +55,10 @@ public class MainController {
                     }
             );
         }
-
         loadMinecraftVersions();
         setupWorldScopedTab();
         setupExternalDrop(categoryTabPane);
+        refreshLists();
     }
 
     private void configureAllTabListViews() {
@@ -588,5 +590,137 @@ public class MainController {
 
         availableStructuresView.setItems(loadDirectoryContents(repoStructures));
         enabledStructuresView.setItems(loadDirectoryContents(worldStructures));
+    }
+
+    @FXML
+    private void handleBackupWorld() {
+        ListView<String> activeView = getActiveEnabledListView();
+        String selectedWorld = activeView != null ? activeView.getSelectionModel().getSelectedItem() : null;
+
+        if (selectedWorld == null) {
+            new Alert(Alert.AlertType.WARNING, "Please select an enabled world to back up.").show();
+            return;
+        }
+
+        Path worldFolder = getCategoryFolder("saves").resolve(selectedWorld);
+        Path backupFolder = mcDir.resolve("backups");
+        ensureDirectoryExists(backupFolder);
+
+        String timestamp = java.time.LocalDateTime.now()
+                .format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"));
+        Path targetZip = backupFolder.resolve(timestamp + "_" + selectedWorld + ".zip");
+
+        runAsyncTask(
+                "Compressing world backup...",
+                () -> zipDirectory(worldFolder, targetZip),
+                () -> new Alert(Alert.AlertType.INFORMATION, "Backup created successfully!").show()
+        );
+    }
+
+    @FXML
+    private void handleRestoreWorld() {
+        javafx.stage.FileChooser chooser = new javafx.stage.FileChooser();
+        chooser.setTitle("Select World Backup Archive");
+        chooser.getExtensionFilters().add(new javafx.stage.FileChooser.ExtensionFilter("Zip Files", "*.zip"));
+
+        Path backupFolder = mcDir.resolve("backups");
+        if (Files.exists(backupFolder)) {
+            chooser.setInitialDirectory(backupFolder.toFile());
+        }
+
+        File selectedFile = chooser.showOpenDialog(categoryTabPane.getScene().getWindow());
+        if (selectedFile != null) {
+            Path targetSaves = getCategoryFolder("saves");
+            try {
+                unzipArchive(selectedFile.toPath(), targetSaves);
+                refreshLists();
+                new Alert(Alert.AlertType.INFORMATION, "World restored successfully to saves!").show();
+            } catch (IOException e) {
+                new Alert(Alert.AlertType.ERROR, "Failed to restore backup: " + e.getMessage()).show();
+            }
+        }
+    }
+
+    // Zip Utility Method
+    private void zipDirectory(Path sourceDir, Path targetZip) throws IOException {
+        try (java.util.zip.ZipOutputStream zos = new java.util.zip.ZipOutputStream(Files.newOutputStream(targetZip));
+             Stream<Path> stream = Files.walk(sourceDir)) {
+            stream.filter(path -> !Files.isDirectory(path)).forEach(path -> {
+                java.util.zip.ZipEntry zipEntry = new java.util.zip.ZipEntry(sourceDir.relativize(path).toString());
+                try {
+                    zos.putNextEntry(zipEntry);
+                    Files.copy(path, zos);
+                    zos.closeEntry();
+                } catch (IOException e) {
+                    System.err.println("Failed zipping path: " + path);
+                }
+            });
+        }
+    }
+
+    // Unzip Utility Method
+    private void unzipArchive(Path zipFile, Path destDir) throws IOException {
+        try (java.util.zip.ZipInputStream zis = new java.util.zip.ZipInputStream(Files.newInputStream(zipFile))) {
+            java.util.zip.ZipEntry entry;
+            while ((entry = zis.getNextEntry()) != null) {
+                Path newPath = destDir.resolve(entry.getName());
+                if (entry.isDirectory()) {
+                    ensureDirectoryExists(newPath);
+                } else {
+                    ensureDirectoryExists(newPath.getParent());
+                    Files.copy(zis, newPath, StandardCopyOption.REPLACE_EXISTING);
+                }
+                zis.closeEntry();
+            }
+        }
+    }
+
+    // Helper to run heavy file operations off the UI thread
+    private void runAsyncTask(String statusMessage, RunnableBackgroundWork work, Runnable onComplete) {
+        categoryTabPane.getScene().setCursor(javafx.scene.Cursor.WAIT);
+        categoryTabPane.setDisable(true);
+
+        if (statusLabel != null) statusLabel.setText(statusMessage);
+        if (operationProgressBar != null) {
+            operationProgressBar.setVisible(true);
+            operationProgressBar.setProgress(ProgressIndicator.INDETERMINATE_PROGRESS);
+        }
+        if (operationSpinner != null) operationSpinner.setVisible(true);
+
+        javafx.concurrent.Task<Void> task = new javafx.concurrent.Task<>() {
+            @Override
+            protected Void call() throws Exception {
+                work.run();
+                return null;
+            }
+        };
+
+        task.setOnSucceeded(e -> {
+            resetUIState("Ready");
+            if (onComplete != null) onComplete.run();
+        });
+
+        task.setOnFailed(e -> {
+            resetUIState("Error during operation.");
+            Throwable ex = task.getException();
+            new Alert(Alert.AlertType.ERROR, "Operation failed: " + ex.getMessage()).show();
+        });
+
+        new Thread(task).start();
+    }
+
+    private void resetUIState(String message) {
+        if (categoryTabPane.getScene() != null) {
+            categoryTabPane.getScene().setCursor(javafx.scene.Cursor.DEFAULT);
+        }
+        categoryTabPane.setDisable(false);
+        if (statusLabel != null) statusLabel.setText(message);
+        if (operationProgressBar != null) operationProgressBar.setVisible(false);
+        if (operationSpinner != null) operationSpinner.setVisible(false);
+    }
+
+    @FunctionalInterface
+    private interface RunnableBackgroundWork {
+        void run() throws Exception;
     }
 }
