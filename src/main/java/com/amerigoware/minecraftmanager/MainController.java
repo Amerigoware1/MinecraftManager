@@ -10,7 +10,6 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
-import javafx.scene.layout.HBox;
 import javafx.stage.DirectoryChooser;
 
 import java.io.File;
@@ -24,46 +23,69 @@ import java.util.stream.Stream;
 public class MainController {
 
     @FXML private TabPane categoryTabPane;
-    @FXML private ListView<String> disabledListView;
-    @FXML private ListView<String> enabledListView;
     @FXML private ComboBox<String> versionComboBox;
 
-    // Datapacks & Structures Tab Controls
-    @FXML private ListView<String> availableDatapacksView;
-    @FXML private ListView<String> enabledDatapacksView;
-    @FXML private ListView<String> availableStructuresView;
-    @FXML private ListView<String> enabledStructuresView;
+    // Tab-specific ListViews
+    @FXML private ListView<String> modsDisabledListView, modsEnabledListView;
+    @FXML private ListView<String> shadersDisabledListView, shadersEnabledListView;
+    @FXML private ListView<String> resourcePacksDisabledListView, resourcePacksEnabledListView;
+    @FXML private ListView<String> worldsDisabledListView, worldsEnabledListView;
+
+    // Datapacks & Structures ListViews
+    @FXML private ListView<String> availableDatapacksView, enabledDatapacksView;
+    @FXML private ListView<String> availableStructuresView, enabledStructuresView;
     @FXML private ListView<String> worldSelectorListView;
-    @FXML private HBox generalTabContent;
+
     private Path mcDir;
 
     @FXML
     public void initialize() {
         mcDir = getDefaultMinecraftDirectory();
 
-        // Enable multiple selection
-        disabledListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        enabledListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        // Configure event listeners and drag-and-drop across all tab list views
+        configureAllTabListViews();
 
-        categoryTabPane.getSelectionModel().selectedItemProperty().addListener(
-                (obs, oldTab, newTab) -> refreshLists()
-        );
+        // Single tab selection listener to auto-refresh lists
+        if (categoryTabPane != null) {
+            categoryTabPane.getSelectionModel().selectedItemProperty().addListener(
+                    (obs, oldTab, newTab) -> {
+                        if (newTab != null) refreshLists();
+                    }
+            );
+        }
 
-        disabledListView.setOnMouseClicked(e -> handleDoubleClick(e, true));
-        enabledListView.setOnMouseClicked(e -> handleDoubleClick(e, false));
-
-        disabledListView.setOnKeyPressed(event -> {
-            if (event.getCode() == KeyCode.DELETE) handleDeleteDisabled();
-        });
-        enabledListView.setOnKeyPressed(event -> {
-            if (event.getCode() == KeyCode.DELETE) handleDeleteEnabled();
-        });
-
-        setupDragAndDrop();
         loadMinecraftVersions();
-        setupWorldScopedTab(); // Fixed: Initialize world-scoped tab listener & list
+        setupWorldScopedTab();
         setupExternalDrop(categoryTabPane);
-        refreshLists();
+    }
+
+    private void configureAllTabListViews() {
+        ListView<String>[] disabledViews = new ListView[]{
+                modsDisabledListView, shadersDisabledListView, resourcePacksDisabledListView, worldsDisabledListView
+        };
+        ListView<String>[] enabledViews = new ListView[]{
+                modsEnabledListView, shadersEnabledListView, resourcePacksEnabledListView, worldsEnabledListView
+        };
+
+        for (int i = 0; i < disabledViews.length; i++) {
+            configureListView(disabledViews[i], true);
+            configureListView(enabledViews[i], false);
+        }
+    }
+
+    private void configureListView(ListView<String> listView, boolean isDisabledPane) {
+        if (listView == null) return;
+
+        listView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        listView.setOnMouseClicked(e -> handleDoubleClick(e, isDisabledPane));
+        listView.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.DELETE) {
+                if (isDisabledPane) handleDeleteDisabled(); else handleDeleteEnabled();
+            }
+        });
+
+        setupDragSource(listView);
+        setupDropTarget(listView, isDisabledPane);
     }
 
     private void loadMinecraftVersions() {
@@ -92,7 +114,9 @@ public class MainController {
 
     private void handleDoubleClick(MouseEvent event, boolean isDisabledPane) {
         if (event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2) {
-            ListView<String> sourceView = isDisabledPane ? disabledListView : enabledListView;
+            ListView<String> sourceView = isDisabledPane ? getActiveDisabledListView() : getActiveEnabledListView();
+            if (sourceView == null) return;
+
             List<String> selectedItems = new ArrayList<>(sourceView.getSelectionModel().getSelectedItems());
 
             if (!selectedItems.isEmpty()) {
@@ -107,14 +131,6 @@ public class MainController {
                 refreshLists();
             }
         }
-    }
-
-    private void setupDragAndDrop() {
-        setupDragSource(disabledListView);
-        setupDragSource(enabledListView);
-
-        setupDropTarget(disabledListView, true);
-        setupDropTarget(enabledListView, false);
     }
 
     private void setupDragSource(ListView<String> listView) {
@@ -220,34 +236,53 @@ public class MainController {
         }
     }
 
+    private ListView<String> getActiveDisabledListView() {
+        Tab selected = categoryTabPane.getSelectionModel().getSelectedItem();
+        if (selected == null) return modsDisabledListView;
+        String text = selected.getText();
+        if (text.contains("Shader")) return shadersDisabledListView;
+        if (text.contains("Resource")) return resourcePacksDisabledListView;
+        if (text.contains("World")) return worldsDisabledListView;
+        return modsDisabledListView;
+    }
+
+    private ListView<String> getActiveEnabledListView() {
+        Tab selected = categoryTabPane.getSelectionModel().getSelectedItem();
+        if (selected == null) return modsEnabledListView;
+        String text = selected.getText();
+        if (text.contains("Shader")) return shadersEnabledListView;
+        if (text.contains("Resource")) return resourcePacksEnabledListView;
+        if (text.contains("World")) return worldsEnabledListView;
+        return modsEnabledListView;
+    }
+
     private void refreshLists() {
         if (mcDir == null || !Files.exists(mcDir)) return;
 
         Tab selectedTab = categoryTabPane.getSelectionModel().getSelectedItem();
+        if (selectedTab == null) return;
 
-        // Dynamically re-parent the dual ListView container to the active general tab
-        if (selectedTab != null && generalTabContent != null && !selectedTab.getText().contains("Datapacks")) {
-            selectedTab.setContent(generalTabContent);
-        }
-
-        // Populate general tab lists
-        String dirName = getDirectoryNameForTab();
-        Path enabledPath = getCategoryFolder(dirName);
-        Path disabledPath = enabledPath.resolveSibling(dirName + "_disabled");
-
-        ensureDirectoryExists(enabledPath);
-        ensureDirectoryExists(disabledPath);
-
-        if (disabledListView != null) disabledListView.setItems(loadDirectoryContents(disabledPath));
-        if (enabledListView != null) enabledListView.setItems(loadDirectoryContents(enabledPath));
-
-        // Refresh world-scoped datapacks & structures
-        loadWorldList();
-        if (worldSelectorListView != null) {
-            String selectedWorld = worldSelectorListView.getSelectionModel().getSelectedItem();
-            if (selectedWorld != null) {
-                refreshWorldScopedLists(selectedWorld);
+        if (selectedTab.getText().contains("Datapack")) {
+            loadWorldList();
+            if (worldSelectorListView != null) {
+                String selectedWorld = worldSelectorListView.getSelectionModel().getSelectedItem();
+                if (selectedWorld != null) {
+                    refreshWorldScopedLists(selectedWorld);
+                }
             }
+        } else {
+            String dirName = getDirectoryNameForTab();
+            Path enabledPath = getCategoryFolder(dirName);
+            Path disabledPath = enabledPath.resolveSibling(dirName + "_disabled");
+
+            ensureDirectoryExists(enabledPath);
+            ensureDirectoryExists(disabledPath);
+
+            ListView<String> disabledView = getActiveDisabledListView();
+            ListView<String> enabledView = getActiveEnabledListView();
+
+            if (disabledView != null) disabledView.setItems(loadDirectoryContents(disabledPath));
+            if (enabledView != null) enabledView.setItems(loadDirectoryContents(enabledPath));
         }
     }
 
@@ -331,9 +366,10 @@ public class MainController {
     }
 
     private void deleteSelectedItem(boolean isDisabledPane) {
-        ListView<String> targetView = isDisabledPane ? disabledListView : enabledListView;
-        List<String> selectedItems = new ArrayList<>(targetView.getSelectionModel().getSelectedItems());
+        ListView<String> targetView = isDisabledPane ? getActiveDisabledListView() : getActiveEnabledListView();
+        if (targetView == null) return;
 
+        List<String> selectedItems = new ArrayList<>(targetView.getSelectionModel().getSelectedItems());
         if (selectedItems.isEmpty()) return;
 
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);

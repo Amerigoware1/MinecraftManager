@@ -21,29 +21,74 @@
         </Menu>
     </MenuBar>
 
-    <!-- Main Navigation Tabs -->
+    <!-- Main Navigation TabPane -->
     <TabPane fx:id="categoryTabPane" tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
-        <!-- Default tab hosting the shared HBox layout -->
+
+        <!-- Mods Tab -->
         <Tab text="Mods">
-            <HBox fx:id="generalTabContent" spacing="15.0" style="-fx-padding: 10;">
+            <HBox spacing="15.0" style="-fx-padding: 10;">
                 <VBox spacing="5.0" HBox.hgrow="ALWAYS">
                     <Label text="Disabled" style="-fx-font-weight: bold; -fx-text-fill: #d32f2f;" />
-                    <ListView fx:id="disabledListView" VBox.vgrow="ALWAYS" />
+                    <ListView fx:id="modsDisabledListView" VBox.vgrow="ALWAYS" />
                     <Button text="Delete Selected" onAction="#handleDeleteDisabled" style="-fx-text-fill: #d32f2f;" />
                 </VBox>
-
                 <VBox spacing="5.0" HBox.hgrow="ALWAYS">
                     <Label text="Enabled" style="-fx-font-weight: bold; -fx-text-fill: #388e3c;" />
-                    <ListView fx:id="enabledListView" VBox.vgrow="ALWAYS" />
+                    <ListView fx:id="modsEnabledListView" VBox.vgrow="ALWAYS" />
                     <Button text="Delete Selected" onAction="#handleDeleteEnabled" style="-fx-text-fill: #d32f2f;" />
                 </VBox>
             </HBox>
         </Tab>
-        <Tab text="Shaders" />
-        <Tab text="Resource Packs" />
-        <Tab text="Worlds" />
 
-        <!-- Dedicated Tab for Datapacks & Structures -->
+        <!-- Shaders Tab -->
+        <Tab text="Shaders">
+            <HBox spacing="15.0" style="-fx-padding: 10;">
+                <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                    <Label text="Disabled" style="-fx-font-weight: bold; -fx-text-fill: #d32f2f;" />
+                    <ListView fx:id="shadersDisabledListView" VBox.vgrow="ALWAYS" />
+                    <Button text="Delete Selected" onAction="#handleDeleteDisabled" style="-fx-text-fill: #d32f2f;" />
+                </VBox>
+                <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                    <Label text="Enabled" style="-fx-font-weight: bold; -fx-text-fill: #388e3c;" />
+                    <ListView fx:id="shadersEnabledListView" VBox.vgrow="ALWAYS" />
+                    <Button text="Delete Selected" onAction="#handleDeleteEnabled" style="-fx-text-fill: #d32f2f;" />
+                </VBox>
+            </HBox>
+        </Tab>
+
+        <!-- Resource Packs Tab -->
+        <Tab text="Resource Packs">
+            <HBox spacing="15.0" style="-fx-padding: 10;">
+                <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                    <Label text="Disabled" style="-fx-font-weight: bold; -fx-text-fill: #d32f2f;" />
+                    <ListView fx:id="resourcePacksDisabledListView" VBox.vgrow="ALWAYS" />
+                    <Button text="Delete Selected" onAction="#handleDeleteDisabled" style="-fx-text-fill: #d32f2f;" />
+                </VBox>
+                <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                    <Label text="Enabled" style="-fx-font-weight: bold; -fx-text-fill: #388e3c;" />
+                    <ListView fx:id="resourcePacksEnabledListView" VBox.vgrow="ALWAYS" />
+                    <Button text="Delete Selected" onAction="#handleDeleteEnabled" style="-fx-text-fill: #d32f2f;" />
+                </VBox>
+            </HBox>
+        </Tab>
+
+        <!-- Worlds Tab -->
+        <Tab text="Worlds">
+            <HBox spacing="15.0" style="-fx-padding: 10;">
+                <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                    <Label text="Disabled" style="-fx-font-weight: bold; -fx-text-fill: #d32f2f;" />
+                    <ListView fx:id="worldsDisabledListView" VBox.vgrow="ALWAYS" />
+                    <Button text="Delete Selected" onAction="#handleDeleteDisabled" style="-fx-text-fill: #d32f2f;" />
+                </VBox>
+                <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                    <Label text="Enabled" style="-fx-font-weight: bold; -fx-text-fill: #388e3c;" />
+                    <ListView fx:id="worldsEnabledListView" VBox.vgrow="ALWAYS" />
+                    <Button text="Delete Selected" onAction="#handleDeleteEnabled" style="-fx-text-fill: #d32f2f;" />
+                </VBox>
+            </HBox>
+        </Tab>
+
+        <!-- Datapacks & Structures Tab -->
         <Tab text="Datapacks &amp; Structures">
             <SplitPane dividerPositions="0.75">
                 <VBox spacing="10.0" style="-fx-padding: 10;">
@@ -68,6 +113,7 @@
                 </VBox>
             </SplitPane>
         </Tab>
+
     </TabPane>
 
     <!-- Bottom Controls -->
