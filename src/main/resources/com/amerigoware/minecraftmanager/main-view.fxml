@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox spacing="10.0" xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.amerigoware.minecraftmanager.MainController">
+
+    <!-- Top MenuBar -->
+    <MenuBar>
+        <Menu text="File">
+            <MenuItem text="Select .minecraft Folder..." onAction="#handleChooseFolder" />
+            <MenuItem text="Launch Minecraft" onAction="#handleLaunch" />
+            <SeparatorMenuItem />
+            <MenuItem text="Exit" onAction="#handleExit" />
+        </Menu>
+        <Menu text="Tools">
+            <MenuItem text="Migrate Legacy Content..." onAction="#handleMigrateDefaultContent" />
+            <MenuItem text="Refresh Lists" onAction="#handleRefresh" />
+        </Menu>
+    </MenuBar>
+
+    <!-- Main Navigation Tabs -->
+    <TabPane fx:id="categoryTabPane" tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
+        <!-- Default tab hosting the shared HBox layout -->
+        <Tab text="Mods">
+            <HBox fx:id="generalTabContent" spacing="15.0" style="-fx-padding: 10;">
+                <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                    <Label text="Disabled" style="-fx-font-weight: bold; -fx-text-fill: #d32f2f;" />
+                    <ListView fx:id="disabledListView" VBox.vgrow="ALWAYS" />
+                    <Button text="Delete Selected" onAction="#handleDeleteDisabled" style="-fx-text-fill: #d32f2f;" />
+                </VBox>
+
+                <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                    <Label text="Enabled" style="-fx-font-weight: bold; -fx-text-fill: #388e3c;" />
+                    <ListView fx:id="enabledListView" VBox.vgrow="ALWAYS" />
+                    <Button text="Delete Selected" onAction="#handleDeleteEnabled" style="-fx-text-fill: #d32f2f;" />
+                </VBox>
+            </HBox>
+        </Tab>
+        <Tab text="Shaders" />
+        <Tab text="Resource Packs" />
+        <Tab text="Worlds" />
+
+        <!-- Dedicated Tab for Datapacks & Structures -->
+        <Tab text="Datapacks &amp; Structures">
+            <SplitPane dividerPositions="0.75">
+                <VBox spacing="10.0" style="-fx-padding: 10;">
+                    <VBox spacing="5.0" VBox.vgrow="ALWAYS">
+                        <Label text="Datapacks (Available vs Enabled)" style="-fx-font-weight: bold; -fx-text-fill: #00e676;" />
+                        <HBox spacing="10.0" VBox.vgrow="ALWAYS">
+                            <ListView fx:id="availableDatapacksView" HBox.hgrow="ALWAYS" />
+                            <ListView fx:id="enabledDatapacksView" HBox.hgrow="ALWAYS" />
+                        </HBox>
+                    </VBox>
+                    <VBox spacing="5.0" VBox.vgrow="ALWAYS">
+                        <Label text="Structures &amp; NBT (Available vs Enabled)" style="-fx-font-weight: bold; -fx-text-fill: #00e676;" />
+                        <HBox spacing="10.0" VBox.vgrow="ALWAYS">
+                            <ListView fx:id="availableStructuresView" HBox.hgrow="ALWAYS" />
+                            <ListView fx:id="enabledStructuresView" HBox.hgrow="ALWAYS" />
+                        </HBox>
+                    </VBox>
+                </VBox>
+                <VBox spacing="5.0" style="-fx-padding: 10;">
+                    <Label text="Select Target World" style="-fx-font-weight: bold; -fx-text-fill: #d0d7e5;" />
+                    <ListView fx:id="worldSelectorListView" VBox.vgrow="ALWAYS" />
+                </VBox>
+            </SplitPane>
+        </Tab>
+    </TabPane>
+
+    <!-- Bottom Controls -->
+    <HBox spacing="10.0" alignment="CENTER_LEFT" VBox.vgrow="NEVER" style="-fx-padding: 10;">
+        <Button text="Refresh" onAction="#handleRefresh" minWidth="-Infinity" />
+        <ComboBox fx:id="versionComboBox" HBox.hgrow="ALWAYS" maxWidth="Infinity" />
+        <Button text="Choose .minecraft..." onAction="#handleChooseFolder" minWidth="-Infinity" />
+        <Button text="Launch Minecraft" onAction="#handleLaunch" minWidth="-Infinity" />
+    </HBox>
+
+</VBox>

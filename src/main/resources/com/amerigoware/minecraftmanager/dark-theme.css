@@ -1,0 +1,112 @@
+/* Midnight Void Base Theme */
+.root {
+    -fx-base: #090a0f;
+    -fx-background-color: #0a0b10;
+    -fx-text-fill: #e1e4ed;
+    -fx-font-family: 'Segoe UI', System, sans-serif;
+}
+
+/* Category Tabs */
+.tab-pane .tab-header-area .tab-header-background {
+    -fx-background-color: #12131c;
+    -fx-border-color: transparent transparent #1f2130 transparent;
+}
+
+.tab {
+    -fx-background-color: #161824;
+    -fx-background-radius: 6px 6px 0 0;
+    -fx-padding: 6px 14px;
+}
+
+.tab .tab-label {
+    -fx-text-fill: #8b92a5;
+    -fx-font-weight: bold;
+}
+
+.tab:hover .tab-label {
+    -fx-text-fill: #d0d7e5;
+}
+
+.tab:selected {
+    -fx-background-color: #202436;
+    -fx-border-color: #00e676 transparent transparent transparent;
+    -fx-border-width: 2px;
+}
+
+.tab:selected .tab-label {
+    -fx-text-fill: #00e676;
+}
+
+/* List Panes */
+.list-view {
+    -fx-background-color: #10111a;
+    -fx-border-color: #1f2233;
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+    -fx-padding: 4px;
+}
+
+.list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #c5cbe0;
+    -fx-padding: 6px 10px;
+}
+
+.list-cell:filled:hover {
+    -fx-background-color: #1a1d2e;
+    -fx-text-fill: #ffffff;
+    -fx-background-radius: 4px;
+}
+
+.list-cell:filled:selected {
+    -fx-background-color: #242b45;
+    -fx-text-fill: #00e676;
+    -fx-background-radius: 4px;
+}
+
+/* Buttons */
+.button {
+    -fx-background-color: #161824;
+    -fx-text-fill: #d0d7e5;
+    -fx-border-color: #272a3f;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+    -fx-font-weight: bold;
+    -fx-padding: 6px 12px;
+}
+
+.button:hover {
+    -fx-background-color: #222638;
+    -fx-border-color: #3b405e;
+    -fx-cursor: hand;
+}
+
+.button:pressed {
+    -fx-background-color: #11131d;
+}
+
+/* Combo Box */
+.combo-box {
+    -fx-background-color: #161824;
+    -fx-border-color: #272a3f;
+    -fx-border-radius: 5px;
+    -fx-mark-color: #8b92a5;
+}
+
+.combo-box .list-cell {
+    -fx-text-fill: #d0d7e5;
+}
+
+/* Scrollbars */
+.scroll-bar:vertical, .scroll-bar:horizontal {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar .thumb {
+    -fx-background-color: #222536;
+    -fx-background-radius: 4px;
+}
+
+.scroll-bar .thumb:hover {
+    -fx-background-color: #323750;
+}
