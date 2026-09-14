@@ -2,6 +2,7 @@ module com.amerigoware.minecraftmanager {
     requires javafx.controls;
     requires javafx.fxml;
     requires java.desktop;
+    requires java.prefs;
 
 
     opens com.amerigoware.minecraftmanager to javafx.fxml;

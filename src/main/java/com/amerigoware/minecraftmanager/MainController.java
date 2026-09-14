@@ -11,7 +11,7 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.stage.DirectoryChooser;
-
+import java.util.prefs.Preferences;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
@@ -90,6 +90,8 @@ public class MainController {
         setupDropTarget(listView, isDisabledPane);
     }
 
+    private final Preferences prefs = Preferences.userNodeForPackage(MainController.class);
+
     private void loadMinecraftVersions() {
         Path versionsFolder = mcDir.resolve("versions");
         ObservableList<String> versions = FXCollections.observableArrayList("Default (.minecraft)");
@@ -107,10 +109,23 @@ public class MainController {
         }
 
         versionComboBox.setItems(versions);
-        versionComboBox.getSelectionModel().selectFirst();
 
+        // Restore saved version setting or default to first item
+        String savedVersion = prefs.get("selected_version", "Default (.minecraft)");
+        if (versions.contains(savedVersion)) {
+            versionComboBox.getSelectionModel().select(savedVersion);
+        } else {
+            versionComboBox.getSelectionModel().selectFirst();
+        }
+
+        // Save selection whenever changed
         versionComboBox.getSelectionModel().selectedItemProperty().addListener(
-                (obs, oldVal, newVal) -> refreshLists()
+                (obs, oldVal, newVal) -> {
+                    if (newVal != null) {
+                        prefs.put("selected_version", newVal);
+                        refreshLists();
+                    }
+                }
         );
     }
 
