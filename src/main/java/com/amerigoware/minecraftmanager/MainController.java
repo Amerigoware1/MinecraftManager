@@ -723,4 +723,46 @@ public class MainController {
     private interface RunnableBackgroundWork {
         void run() throws Exception;
     }
+
+    @FXML
+    private void handleAbout() {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("About Minecraft Manager");
+        alert.setHeaderText("Minecraft Manager v2.0\nCreated by Emmery Chrisco (Amerigoware)");
+
+        javafx.scene.layout.VBox content = new javafx.scene.layout.VBox(10);
+
+        Label bioLabel = new Label(
+                "A lightweight desktop utility for toggling mods, shaders, resource packs, " +
+                        "and managing world backups without launcher overhead."
+        );
+        bioLabel.setWrapText(true);
+
+        Label authorNote = new Label(
+                "When I'm not programming utilities or building massive castles in Minecraft, " +
+                        "I author hard science fiction novels."
+        );
+        authorNote.setWrapText(true);
+
+        Hyperlink mainWikiLink = new Hyperlink("• Explore the 'One Mind, Two Stars' Worldbuilding Wiki");
+        mainWikiLink.setOnAction(e -> openWebpage("https://amerigoware1.github.io/One-Mind-Two-Stars-Wiki/index.html"));
+
+        Hyperlink anthologyLink = new Hyperlink("• Read the Preview Anthology (Password: BRIDGE)");
+        anthologyLink.setOnAction(e -> openWebpage("https://amerigoware1.github.io/One-Mind-Two-Stars-Wiki/anthology.html"));
+
+        content.getChildren().addAll(bioLabel, authorNote, mainWikiLink, anthologyLink);
+
+        alert.getDialogPane().setContent(content);
+        alert.showAndWait();
+    }
+
+    private void openWebpage(String url) {
+        try {
+            if (java.awt.Desktop.isDesktopSupported() && java.awt.Desktop.getDesktop().isSupported(java.awt.Desktop.Action.BROWSE)) {
+                java.awt.Desktop.getDesktop().browse(new java.net.URI(url));
+            }
+        } catch (Exception e) {
+            System.err.println("Failed to open browser URL: " + e.getMessage());
+        }
+    }
 }

@@ -22,6 +22,9 @@
             <MenuItem text="Restore World from Backup..." onAction="#handleRestoreWorld" />
             <SeparatorMenuItem />
         </Menu>
+        <Menu text="Help">
+            <MenuItem text="About Minecraft Manager..." onAction="#handleAbout" />
+        </Menu>
     </MenuBar>
 
     <!-- Main Navigation TabPane -->
